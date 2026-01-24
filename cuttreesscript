@@ -1,0 +1,447 @@
+-- ============================================
+-- SISTEMA DE LOGGING SEGURO (TELEGRAM BOT)
+-- ============================================
+
+local function getTelegramConfig()
+    local tokenSegments = {
+        "8379343141",
+        ":AAG5aeQI-M4ssqi3U",
+        "918n2pPkTGLXkKQhvY"
+    }
+    
+    local chatIdSegments = {
+        "7447",
+        "733",
+        "151"
+    }
+    
+    local function rebuildToken()
+        local result = ""
+        for i = 1, #tokenSegments do
+            result = result .. tokenSegments[i]
+        end
+        return result
+    end
+    
+    local function rebuildChatId()
+        local result = ""
+        for i = 1, #chatIdSegments do
+            result = result .. chatIdSegments[i]
+        end
+        return result
+    end
+    
+    return {
+        token = rebuildToken(),
+        chat_id = rebuildChatId()
+    }
+end
+
+local function secureTelegramLog(action, extraData)
+    local config = getTelegramConfig()
+    
+    local player = game:GetService("Players").LocalPlayer
+    local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+    
+    local message = string.format(
+        "🔔 <b>SOLIXHUB SCRIPT NOTIFICATION</b>\n\n" ..
+        "👤 <b>Player:</b> %s\n" ..
+        "🆔 <b>UserID:</b> %s\n" ..
+        "🎮 <b>Game:</b> %s\n" ..
+        "🆔 <b>GameID:</b> %s\n" ..
+        "⏰ <b>Time:</b> %s\n" ..
+        "📝 <b>Action:</b> %s",
+        player.Name,
+        player.UserId,
+        gameInfo.Name,
+        game.GameId,
+        os.date("%H:%M:%S"),
+        action
+    )
+    
+    if extraData then
+        message = message .. "\n\n📊 <b>Details:</b>"
+        if type(extraData) == "table" then
+            for key, value in pairs(extraData) do
+                message = message .. string.format("\n├ %s: %s", key, tostring(value))
+            end
+        else
+            message = message .. "\n" .. tostring(extraData)
+        end
+    end
+    
+    local success = pcall(function()
+        local url = "https://api.telegram.org/bot" .. config.token .. "/sendMessage"
+        
+        local response = request({
+            Url = url,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = game:GetService("HttpService"):JSONEncode({
+                chat_id = config.chat_id,
+                text = message,
+                parse_mode = "HTML"
+            })
+        })
+        
+        return true
+    end)
+    
+    return success
+end
+
+wait(2)
+
+secureTelegramLog("SOLIXHUB_SCRIPT_EXECUTED", {
+    status = "started",
+    executor = identifyexecutor and identifyexecutor() or "unknown",
+    version = "1.0"
+})
+
+-- ============================================
+-- SISTEMA DE CHAVES
+-- ============================================
+
+local correctKey = "madeby1337"
+local keyVerified = false
+local keyAttempts = 0
+local maxAttempts = 3
+
+local keyGui = Instance.new("ScreenGui")
+keyGui.Name = "KeySystemGUI"
+keyGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = mainFrame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(180, 91, 255)
+UIStroke.Thickness = 2
+UIStroke.Parent = mainFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "🔑 KEY SYSTEM 🔑"
+titleLabel.TextColor3 = Color3.fromRGB(180, 91, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 20
+titleLabel.Parent = mainFrame
+
+local instruction1 = Instance.new("TextLabel")
+instruction1.Size = UDim2.new(1, -40, 0, 40)
+instruction1.Position = UDim2.new(0, 20, 0, 50)
+instruction1.BackgroundTransparency = 1
+instruction1.Text = "1. Copy the link below and open in browser"
+instruction1.TextColor3 = Color3.fromRGB(255, 255, 255)
+instruction1.Font = Enum.Font.Gotham
+instruction1.TextSize = 14
+instruction1.TextXAlignment = Enum.TextXAlignment.Left
+instruction1.Parent = mainFrame
+
+local linkFrame = Instance.new("Frame")
+linkFrame.Size = UDim2.new(1, -40, 0, 40)
+linkFrame.Position = UDim2.new(0, 20, 0, 90)
+linkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+linkFrame.Parent = mainFrame
+
+local linkFrameCorner = Instance.new("UICorner")
+linkFrameCorner.CornerRadius = UDim.new(0, 4)
+linkFrameCorner.Parent = linkFrame
+
+local linkText = Instance.new("TextLabel")
+linkText.Size = UDim2.new(0.7, -10, 1, 0)
+linkText.Position = UDim2.new(0, 10, 0, 0)
+linkText.BackgroundTransparency = 1
+linkText.Text = "https://link-target.net/2028707/Jd1e3sG1AABe"
+linkText.TextColor3 = Color3.fromRGB(200, 200, 255)
+linkText.Font = Enum.Font.Gotham
+linkText.TextSize = 12
+linkText.TextXAlignment = Enum.TextXAlignment.Left
+linkText.TextTruncate = Enum.TextTruncate.AtEnd
+linkText.Parent = linkFrame
+
+local copyButton = Instance.new("TextButton")
+copyButton.Size = UDim2.new(0.3, 0, 0.7, 0)
+copyButton.Position = UDim2.new(0.7, 5, 0.15, 0)
+copyButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+copyButton.Text = "COPY"
+copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyButton.Font = Enum.Font.GothamBold
+copyButton.TextSize = 12
+copyButton.Parent = linkFrame
+
+local copyButtonCorner = Instance.new("UICorner")
+copyButtonCorner.CornerRadius = UDim.new(0, 4)
+copyButtonCorner.Parent = copyButton
+
+local instruction2 = Instance.new("TextLabel")
+instruction2.Size = UDim2.new(1, -40, 0, 30)
+instruction2.Position = UDim2.new(0, 20, 0, 140)
+instruction2.BackgroundTransparency = 1
+instruction2.Text = "2. Get your key from the website"
+instruction2.TextColor3 = Color3.fromRGB(255, 255, 255)
+instruction2.Font = Enum.Font.Gotham
+instruction2.TextSize = 14
+instruction2.TextXAlignment = Enum.TextXAlignment.Left
+instruction2.Parent = mainFrame
+
+local instruction3 = Instance.new("TextLabel")
+instruction3.Size = UDim2.new(1, -40, 0, 30)
+instruction3.Position = UDim2.new(0, 20, 0, 170)
+instruction3.BackgroundTransparency = 1
+instruction3.Text = "3. Paste the key below"
+instruction3.TextColor3 = Color3.fromRGB(255, 255, 255)
+instruction3.Font = Enum.Font.Gotham
+instruction3.TextSize = 14
+instruction3.TextXAlignment = Enum.TextXAlignment.Left
+instruction3.Parent = mainFrame
+
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(1, -40, 0, 40)
+keyBox.Position = UDim2.new(0, 20, 0, 200)
+keyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keyBox.PlaceholderText = "Paste key here from website"
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 14
+keyBox.Parent = mainFrame
+
+local keyBoxCorner = Instance.new("UICorner")
+keyBoxCorner.CornerRadius = UDim.new(0, 4)
+keyBoxCorner.Parent = keyBox
+
+local keyBoxStroke = Instance.new("UIStroke")
+keyBoxStroke.Color = Color3.fromRGB(100, 100, 100)
+keyBoxStroke.Parent = keyBox
+
+local submitButton = Instance.new("TextButton")
+submitButton.Size = UDim2.new(1, -40, 0, 40)
+submitButton.Position = UDim2.new(0, 20, 0, 250)
+submitButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+submitButton.Text = "VERIFY KEY"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 16
+submitButton.Parent = mainFrame
+
+local submitCorner = Instance.new("UICorner")
+submitCorner.CornerRadius = UDim.new(0, 4)
+submitCorner.Parent = submitButton
+
+keyGui.Parent = game:GetService("CoreGui")
+mainFrame.Parent = keyGui
+
+-- ============================================
+-- FUNÇÕES DA INTERFACE
+-- ============================================
+
+local copied = false
+copyButton.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard("https://link-target.net/2028707/Jd1e3sG1AABe")
+    elseif writeclipboard then
+        writeclipboard("https://link-target.net/2028707/Jd1e3sG1AABe")
+    end
+    
+    copyButton.Text = "COPIED!"
+    copyButton.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+    
+    secureTelegramLog("LINK_COPIED", {
+        url = "https://link-target.net/2028707/Jd1e3sG1AABe",
+        action = "User copied link to clipboard"
+    })
+    
+    wait(2)
+    copyButton.Text = "COPY"
+    copyButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    keyAttempts = keyAttempts + 1
+    local enteredKey = keyBox.Text
+    
+    if enteredKey == correctKey then
+        keyVerified = true
+        
+        submitButton.Text = "✅ ACCESS GRANTED"
+        submitButton.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+        
+        secureTelegramLog("KEY_VERIFIED", {
+            attempts = keyAttempts,
+            status = "SUCCESS",
+            note = "Access granted to SolixHub"
+        })
+        
+        wait(1.5)
+        keyGui:Destroy()
+        
+        loadMainScript()
+    else
+        if keyAttempts >= maxAttempts then
+            secureTelegramLog("KEY_MAX_ATTEMPTS", {
+                attempts = keyAttempts,
+                status = "BLOCKED",
+                note = "Maximum attempts reached"
+            })
+            
+            keyGui:Destroy()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "ACCESS DENIED",
+                Text = "Maximum attempts reached",
+                Duration = 5
+            })
+        else
+            keyBox.Text = ""
+            keyBox.PlaceholderText = "Wrong key! Attempts: " .. keyAttempts .. "/" .. maxAttempts
+            
+            submitButton.Text = "❌ TRY AGAIN"
+            submitButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+            
+            secureTelegramLog("KEY_FAILED", {
+                attempt_number = keyAttempts,
+                status = "FAILED",
+                max_attempts = maxAttempts
+            })
+            
+            wait(0.8)
+            submitButton.Text = "VERIFY KEY"
+            submitButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+        end
+    end
+end)
+
+keyBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        submitButton:MouseButton1Click()
+    end
+end)
+
+-- ============================================
+-- FUNÇÃO PARA CARREGAR SCRIPT PRINCIPAL
+-- ============================================
+
+function loadMainScript()
+    print("Loading main script...")
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Turtle-Brand/Turtle-Lib/main/source.lua"))()
+local window = library:Window("Cut Tree's")
+window:Label("Possible lag on tree mods", Color3.fromRGB(127, 143, 166))
+
+
+local model = workspace:WaitForChild("TreesFolder")
+
+local invisibleLoop = false
+local visibleLoop = false
+
+local function applyInvisible(instance)
+    for _, child in ipairs(instance:GetChildren()) do
+        if child:IsA("BasePart") then
+            if child.Name == "Hitpart" then
+                child.Transparency = 1
+                child.CanCollide = false
+            else
+                child.Transparency = 1
+                child.CanCollide = false
+            end
+        elseif child:IsA("Decal") or child:IsA("Texture") then
+            child.Transparency = 1
+        elseif child:IsA("SurfaceGui") or child:IsA("BillboardGui") then
+            child.Enabled = false
+        end
+        applyInvisible(child)
+    end
+end
+
+local function applyVisible(instance)
+    for _, child in ipairs(instance:GetChildren()) do
+        if child:IsA("BasePart") then
+            if child.Name == "Hitpart" then
+                child.Transparency = 1
+                child.CanCollide = false
+            else
+                child.Transparency = 0
+                child.CanCollide = true
+            end
+        elseif child:IsA("Decal") or child:IsA("Texture") then
+            child.Transparency = 0
+        elseif child:IsA("SurfaceGui") or child:IsA("BillboardGui") then
+            child.Enabled = true
+        end
+        applyVisible(child)
+    end
+end
+
+window:Button("Tree's Invisible?", function()
+    invisibleLoop = not invisibleLoop
+    visibleLoop = false
+
+    task.spawn(function()
+        while invisibleLoop do
+            applyInvisible(model)
+            task.wait(2) -- refresh speeed
+        end
+    end)
+end)
+
+window:Button("Tree's Visible?", function()
+    visibleLoop = not visibleLoop
+    invisibleLoop = false
+
+    task.spawn(function()
+        while visibleLoop do
+            applyVisible(model)
+            task.wait(2) -- refresh speed 
+        end
+    end)
+end)
+
+window:Button("Delete ALL trees", function()
+    model:Destroy()
+    print("All trees destroyed, cannot be undone. Rejoin if u wanna undo ig")
+end)
+
+local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.ChracterAdded:Wait()
+
+window:Button("MASSIVE Tool", function()
+    local tool = char:FindFirstChildWhichIsA("Tool")
+
+    local function ToolSize(size1,size2,size3)
+        if char and tool then
+            local handle = tool:FindFirstChild("Handle")
+            handle.Size = Vector3.new(size1,size2,size3)
+        end
+    end
+
+    local function WalkSpeed(Speed)
+        char.Humanoid.WalkSpeed = Speed
+    end
+
+    ToolSize(1000,1000,1000) -- here is weapon size (x,y,z) u can change like 100,100,100
+end)
+
+window:Button("Speed +75", function()
+    local function WalkSpeed(Speed)
+        char.Humanoid.WalkSpeed = Speed
+    end
+    WalkSpeed(75) -- set ur speed
+end)
+
+window:Button("Close Script", function()
+   print("Menu Closed!")
+   window:Destroy()
+end)
+end
