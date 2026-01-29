@@ -1,0 +1,437 @@
+-- ============================================
+-- NOCTRUNHUB - SISTEMA INTEGRADO (SITE V2.0)
+-- ============================================
+
+local HttpService = game:GetService("HttpService")
+local player = game:GetService("Players").LocalPlayer
+local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+
+-- [CONTROLE DE SESSÃO]
+if not _G.NoctrunSession then
+    _G.NoctrunSession = {
+        id = tostring(math.random(100000, 999999)),
+        startTime = os.date("%H:%M:%S"),
+        history = {},
+        logCount = 0
+    }
+end
+
+-- [FUNÇÃO PARA CARREGAR O TEU HUB PRINCIPAL]
+local function LoadSolixMain()
+    print("------------------------------------------")
+    print("NOCTRUNHUB: Key verificada! Carregando Hub...")
+    print("------------------------------------------")
+    
+    -- =============================================================
+    -- COLA O TEU SCRIPT DE EXECUÇÃO (O MAIN HUB) ABAIXO DESTA LINHA:
+    -- =============================================================
+    
+    -- JOAOZINHO HUB (V7 - MAGNET COINS + AUTO COLLECT + SPEED)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local assetTarget = "rbxassetid://113935609011303"
+
+-- VARIÁVEIS DE ESTADO
+local speed = 18
+local noclip = false
+local fly = false
+local flySpeed = 60
+local autoCollect = false 
+local SPEED_TP = 600
+
+-- Referências dinâmicas
+local function getElements()
+    local char = player.Character
+    if not char then return nil, nil, nil end
+    return char, char:FindFirstChild("Humanoid"), char:FindFirstChild("HumanoidRootPart")
+end
+
+-- CFrames dos Gaps
+local Gaps = {
+    [1] = CFrame.new(200, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [2] = CFrame.new(283.999969, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [3] = CFrame.new(398, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [4] = CFrame.new(542, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [5] = CFrame.new(756, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [6] = CFrame.new(1074, -2.97500038, 73, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [7] = CFrame.new(1555, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [8] = CFrame.new(2252.5, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0),
+    [9] = CFrame.new(2607.5, -9.02498817, 0, 0, 0, 1, -1, 0, 0, 0, -1, 0)
+}
+
+-- GUI PRINCIPAL
+if game.CoreGui:FindFirstChild("NoctrunHUB") then game.CoreGui.NoctrunHUB:Destroy() end
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "NoctrunHUB"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 450, 0, 380)
+main.Position = UDim2.new(0.5, -225, 0.5, -190)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main)
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1,0,0,45)
+title.BackgroundTransparency = 1
+title.Text = "NoctrunHUB"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(0,170,255)
+
+-- Abas
+local function tabBtn(text, x)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(0, 130, 0, 35)
+    b.Position = UDim2.new(0, x, 0, 50)
+    b.Text = text
+    b.Font = Enum.Font.GothamBold
+    b.TextColor3 = Color3.new(1,1,1)
+    b.BackgroundColor3 = Color3.fromRGB(45,45,45)
+    Instance.new("UICorner", b)
+    return b
+end
+
+local btnInicio = tabBtn("Início", 15)
+local btnTps = tabBtn("TPs Gaps", 160)
+local btnOutros = tabBtn("Outros", 305)
+
+local function content()
+    local f = Instance.new("Frame", main)
+    f.Size = UDim2.new(1, -30, 1, -110)
+    f.Position = UDim2.new(0, 15, 0, 100)
+    f.BackgroundTransparency = 1
+    f.Visible = false
+    return f
+end
+
+local inicio, tpsFrame, outros = content(), content(), content()
+inicio.Visible = true
+
+local function button(text, y, parent)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(1, -10, 0, 35)
+    if y then b.Position = UDim2.new(0,0,0,y) end
+    b.Text = text
+    b.Font = Enum.Font.Gotham; b.TextSize = 14; b.TextColor3 = Color3.new(1,1,1)
+    b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    Instance.new("UICorner", b)
+    return b
+end
+
+-- --- ABA INÍCIO ---
+local speedBtn = button("Wall Speed: "..speed, 0, inicio)
+speedBtn.MouseButton1Click:Connect(function()
+    speed = (speed >= 200) and 18 or speed + 10
+    speedBtn.Text = "Wall Speed: "..speed
+end)
+
+local noclipBtn = button("Noclip: OFF", 45, inicio)
+noclipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    noclipBtn.Text = "Noclip: "..(noclip and "ON" or "OFF")
+end)
+
+local flyBtn = button("Fly: OFF", 90, inicio)
+flyBtn.MouseButton1Click:Connect(function()
+    fly = not fly
+    flyBtn.Text = "Fly: "..(fly and "ON" or "OFF")
+end)
+
+-- --- ABA TPs ---
+local scrollTps = Instance.new("ScrollingFrame", tpsFrame)
+scrollTps.Size = UDim2.new(1, 0, 1, 0); scrollTps.BackgroundTransparency = 1; scrollTps.ScrollBarThickness = 4
+scrollTps.CanvasSize = UDim2.new(0, 0, 0, 450)
+Instance.new("UIListLayout", scrollTps).Padding = UDim.new(0, 5)
+
+for i = 1, 9 do
+    button("TELEPORT GAP "..i, nil, scrollTps).MouseButton1Click:Connect(function()
+        local _, _, root = getElements()
+        if root then
+            local target = Gaps[i]
+            local dist = (target.Position - root.Position).Magnitude
+            TweenService:Create(root, TweenInfo.new(dist/SPEED_TP, Enum.EasingStyle.Linear), {CFrame = target}):Play()
+        end
+    end)
+end
+
+-- --- ABA OUTROS ---
+local autoCollectBtn = button("Auto Collect (Magnet): OFF", 0, outros)
+autoCollectBtn.MouseButton1Click:Connect(function()
+    autoCollect = not autoCollect
+    autoCollectBtn.Text = "Auto Collect: "..(autoCollect and "ON" or "OFF")
+end)
+
+-- LOOPS GLOBAIS
+RunService.RenderStepped:Connect(function()
+    local char, hum, root = getElements()
+    if not root then return end
+    
+    if not fly and hum then hum.WalkSpeed = speed end
+    
+    -- Fly Logic
+    if fly then
+        hum.PlatformStand = true
+        local bv = root:FindFirstChild("FlyVelocity") or Instance.new("BodyVelocity", root)
+        bv.Name = "FlyVelocity"; bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        local dir = Vector3.new(0,0,0)
+        local camera = workspace.CurrentCamera
+        if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + camera.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - camera.CFrame.LookVector end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - camera.CFrame.RightVector end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + camera.CFrame.RightVector end
+        bv.Velocity = dir * flySpeed
+    else
+        if root:FindFirstChild("FlyVelocity") then root.FlyVelocity:Destroy() end
+        if hum then hum.PlatformStand = false end
+    end
+
+    -- MAGNET / AUTO COLLECT (Puxa as moedas de qualquer lugar)
+    if autoCollect then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            local isCoin = false
+            -- Checa se o objeto é uma moeda pelo ID
+            if (obj:IsA("MeshPart") or obj:IsA("SpecialMesh")) and (obj.MeshId == assetTarget) then
+                isCoin = true
+            elseif (obj:IsA("Decal") or obj:IsA("Texture")) and (obj.Texture == assetTarget) then
+                isCoin = true
+            end
+
+            if isCoin then
+                local targetPart = obj:IsA("BasePart") and obj or obj.Parent
+                if targetPart and targetPart:IsA("BasePart") then
+                    -- Teleporta a moeda para a posição do jogador instantaneamente
+                    targetPart.CFrame = root.CFrame
+                    targetPart.CanCollide = false
+                    if targetPart:IsA("BasePart") then targetPart.Velocity = Vector3.new(0,0,0) end
+                end
+            end
+        end
+    end
+end)
+
+-- Noclip Loop
+RunService.Stepped:Connect(function()
+    if noclip then
+        local char = player.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end
+end)
+
+-- TROCA DE ABAS
+btnInicio.MouseButton1Click:Connect(function() inicio.Visible = true; tpsFrame.Visible = false; outros.Visible = false end)
+btnTps.MouseButton1Click:Connect(function() inicio.Visible = false; tpsFrame.Visible = true; outros.Visible = false end)
+btnOutros.MouseButton1Click:Connect(function() inicio.Visible = false; tpsFrame.Visible = false; outros.Visible = true end)
+    
+    -- =============================================================
+end
+
+local function sendNoctrunLog(action, statusDetail)
+    _G.NoctrunSession.logCount = _G.NoctrunSession.logCount + 1
+    table.insert(_G.NoctrunSession.history, action)
+    
+    local detailsFormatted = string.format(
+        "👤 Player: %s\n" ..
+        "🎮 Game: %s\n" ..
+        "⏰ Start: %s\n" ..
+        "📝 Last Action: %s\n" ..
+        "📊 Session History: %s\n" ..
+        "├ %s",
+        player.Name,
+        gameInfo.Name,
+        _G.NoctrunSession.startTime,
+        action,
+        table.concat(_G.NoctrunSession.history, " -> "),
+        statusDetail or "No additional info"
+    )
+
+    local API_URL = "https://nlcwreopotnsqcbqphri.supabase.co/functions/v1/logs"
+
+    local payload = {
+        player_name = player.Name,
+        user_id = tostring(player.UserId),
+        game_name = gameInfo.Name,
+        game_id = tostring(game.PlaceId),
+        action = action,
+        session_id = _G.NoctrunSession.id,
+        details = detailsFormatted
+    }
+
+    task.spawn(function()
+        pcall(function()
+            request({
+                Url = API_URL,
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end)
+end
+
+-- ============================================
+-- GUI ORIGINAL (SEM ALTERAÇÕES VISUAIS)
+-- ============================================
+
+local correctKey = "madeby1337"
+local keyAttempts = 0
+local maxAttempts = 3
+
+if not shared.SolixHubKeySystem then
+    shared.SolixHubKeySystem = {
+        lastCopyTime = 0,
+        lastSubmitTime = 0,
+        buttonCooldown = 10,
+        copyButtonActive = true,
+        submitButtonActive = true
+    }
+end
+
+local keyCooldowns = shared.SolixHubKeySystem
+local keyGui = Instance.new("ScreenGui")
+keyGui.Name = "KeySystemGUI"
+keyGui.ResetOnSpawn = false
+keyGui.Parent = game:GetService("CoreGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = keyGui
+
+local UICorner = Instance.new("UICorner", mainFrame)
+UICorner.CornerRadius = UDim.new(0, 8)
+
+local UIStroke = Instance.new("UIStroke", mainFrame)
+UIStroke.Color = Color3.fromRGB(180, 91, 255)
+UIStroke.Thickness = 2
+
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "🔑 KEY SYSTEM 🔑"
+titleLabel.TextColor3 = Color3.fromRGB(180, 91, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 20
+
+local instruction1 = Instance.new("TextLabel", mainFrame)
+instruction1.Size = UDim2.new(1, -40, 0, 40)
+instruction1.Position = UDim2.new(0, 20, 0, 50)
+instruction1.BackgroundTransparency = 1
+instruction1.Text = "1. Copy the link below and open in browser"
+instruction1.TextColor3 = Color3.fromRGB(255, 255, 255)
+instruction1.Font = Enum.Font.Gotham
+instruction1.TextSize = 14
+instruction1.TextXAlignment = Enum.TextXAlignment.Left
+
+local linkFrame = Instance.new("Frame", mainFrame)
+linkFrame.Size = UDim2.new(1, -40, 0, 40)
+linkFrame.Position = UDim2.new(0, 20, 0, 90)
+linkFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local linkText = Instance.new("TextLabel", linkFrame)
+linkText.Size = UDim2.new(0.7, -10, 1, 0)
+linkText.Position = UDim2.new(0, 10, 0, 0)
+linkText.BackgroundTransparency = 1
+linkText.Text = "https://noctrunhub.xyz/freekey"
+linkText.TextColor3 = Color3.fromRGB(200, 200, 255)
+linkText.Font = Enum.Font.Gotham
+linkText.TextSize = 12
+linkText.TextXAlignment = Enum.TextXAlignment.Left
+
+local copyButton = Instance.new("TextButton", linkFrame)
+copyButton.Size = UDim2.new(0.3, 0, 0.7, 0)
+copyButton.Position = UDim2.new(0.7, 5, 0.15, 0)
+copyButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+copyButton.Text = "COPY"
+copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyButton.Font = Enum.Font.GothamBold
+copyButton.TextSize = 12
+
+local instruction2 = Instance.new("TextLabel", mainFrame)
+instruction2.Size = UDim2.new(1, -40, 0, 30)
+instruction2.Position = UDim2.new(0, 20, 0, 140)
+instruction2.BackgroundTransparency = 1
+instruction2.Text = "2. Get your key from the website"
+instruction2.TextColor3 = Color3.fromRGB(255, 255, 255)
+instruction2.Font = Enum.Font.Gotham
+instruction2.TextSize = 14
+instruction2.TextXAlignment = Enum.TextXAlignment.Left
+
+local keyBox = Instance.new("TextBox", mainFrame)
+keyBox.Size = UDim2.new(1, -40, 0, 40)
+keyBox.Position = UDim2.new(0, 20, 0, 200)
+keyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keyBox.PlaceholderText = "Paste key here"
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 14
+
+local submitButton = Instance.new("TextButton", mainFrame)
+submitButton.Size = UDim2.new(1, -40, 0, 40)
+submitButton.Position = UDim2.new(0, 20, 0, 250)
+submitButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+submitButton.Text = "VERIFY KEY"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 16
+
+-- [LÓGICA DOS BOTÕES]
+
+copyButton.MouseButton1Click:Connect(function()
+    if not keyCooldowns.copyButtonActive then return end
+    keyCooldowns.copyButtonActive = false
+    if setclipboard then setclipboard(linkText.Text) end
+    copyButton.Text = "COPIED!"
+    copyButton.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+    sendNoctrunLog("LINK_COPIED", "User copied key link")
+    task.wait(2)
+    copyButton.Text = "COPY"
+    copyButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+    keyCooldowns.copyButtonActive = true
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    if not keyCooldowns.submitButtonActive then return end
+    keyAttempts = keyAttempts + 1
+    
+    if keyBox.Text == correctKey then
+        submitButton.Text = "✅ ACCESS GRANTED"
+        submitButton.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+        sendNoctrunLog("KEY_SUCCESS", "Verified on attempt: " .. keyAttempts)
+        task.wait(1)
+        keyGui:Destroy()
+        
+        -- CHAMA A FUNÇÃO QUE CARREGA O TEU HUB PRINCIPAL
+        LoadSolixMain()
+    else
+        if keyAttempts >= maxAttempts then
+            sendNoctrunLog("KEY_FAILED", "MAX ATTEMPTS reached. Last tried: " .. keyBox.Text)
+            keyGui:Destroy()
+            player:Kick("Max attempts reached.")
+        else
+            sendNoctrunLog("KEY_FAILED", "Tried: " .. keyBox.Text .. " (Attempt " .. keyAttempts .. ")")
+            submitButton.Text = "❌ WRONG (" .. keyAttempts .. "/" .. maxAttempts .. ")"
+            submitButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+            task.wait(1.5)
+            submitButton.Text = "VERIFY KEY"
+            submitButton.BackgroundColor3 = Color3.fromRGB(180, 91, 255)
+        end
+    end
+end)
+
+-- LOG DE EXECUÇÃO INICIAL
+task.wait(1)
+sendNoctrunLog("EXECUTION", "Executor: " .. (identifyexecutor and identifyexecutor() or "Unknown"))
