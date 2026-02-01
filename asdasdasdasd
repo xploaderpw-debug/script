@@ -1,0 +1,23 @@
+-- 1. Definir o script que será executado no novo servidor
+local scriptParaRodar = [[
+    repeat task.wait() until game:IsLoaded()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/xploaderpw-debug/script/main/noctrunmm2"))()
+]]
+
+-- 2. Tentar encontrar a função de queue em diferentes formatos (Delta/Xeno/Fluxus)
+local queue = syn and syn.queue_on_teleport or queue_on_teleport or fluxus and fluxus.queue_on_teleport
+
+if queue then
+    queue(scriptParaRodar)
+    print("Script colocado na fila com sucesso!")
+else
+    -- Se chegar aqui, o Delta está a usar um nome alternativo ou não suporta a função
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Erro de Executor",
+        Text = "O Delta não suportou a função de teleport.",
+        Duration = 5
+    })
+end
+
+-- 3. Executar o Teleport
+game:GetService("TeleportService"):TeleportToPlaceInstance(142823291, "718ff1ff-6b51-4576-b006-b665da543c1c", game.Players.LocalPlayer)
